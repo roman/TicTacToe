@@ -7,5 +7,7 @@ module View
   import Control.Monad.Trans (MonadIO)
   import Controller
 
+  import qualified View.NCurses
+
   main :: (MonadIO m) => Controller m ()
-  main = undefined
+  main = View.NCurses.main

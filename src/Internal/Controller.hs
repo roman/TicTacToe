@@ -1,6 +1,7 @@
  module Internal.Controller 
   ( 
-    Player (..) 
+    Controller
+  , Player (..) 
   , Movement (..)
   , evalController
   , getPosition
