@@ -20,21 +20,38 @@ main = do
   mainMenu window
   liftIO endWin
 
+--------------------------------------------------------------------------------
+-- utility functions to avoid the us of liftIO everywhere
+
+printOn :: (MonadIO m) => Window -> Int -> Int -> String -> Controller m ()
+printOn window x y str = liftIO $ mvWAddStr window x y str 
+
+moveCursor :: (MonadIO m) => Int -> Int -> Controller m ()
+moveCursor x y = liftIO $ Curses.move x y >> refresh
+
+refreshScreen :: (MonadIO m) => Controller m ()
+refreshScreen = liftIO refresh
+
+readKey :: (MonadIO m) => Controller m Key
+readKey = liftIO getCh
+
+--------------------------------------------------------------------------------
+
 mainMenu :: (MonadIO m) => Window -> Controller m ()
 mainMenu window = do     
-  liftIO $ do
-    mvWAddStr window 0 0 "Welcome to TicTacToe"
-    mvWAddStr window 2 0 "Please select:"
-    mvWAddStr window 4 0 "1. Play a game"
-    mvWAddStr window 5 0 "2. Exit"
+  
+  printOn window 0 0 "Welcome to TicTacToe"
+  printOn window 2 0 "Please select:"
+  printOn window 4 0 "1. Play a game"
+  printOn window 5 0 "2. Exit"
 
   let readOption triedAlready = do
-      option <- liftIO $ do
-                  when triedAlready $ mvWAddStr window 6 0 "(Invalid Option, try again)"
-                  mvWAddStr window 7 0 "> "
-                  Curses.move 7 2
-                  refresh
-                  getCh
+      option <- do
+        when triedAlready $ printOn window 6 0 "(Invalid Option, try again)"
+        printOn window 7 0 "> "
+        moveCursor 7 2
+        refreshScreen
+        readKey
       case option of
         KeyChar '1' -> liftIO (echo False) >> startGame window >> return ()
         KeyChar '2' -> return ()
@@ -46,15 +63,12 @@ drawMatrix :: (MonadIO m) => Window -> Controller m ()
 drawMatrix window = do
   matrix   <- getMatrix
   position <- getPosition
-  moveCursor
-  liftIO $ do 
-    mvWAddStr window 9 0 (renderMatrix matrix) 
-    mvWAddStr window 16 0 ("Position: " ++ show position)
-    refresh
+  printOn window 9 0 (renderMatrix matrix)
+  printOn window 16 0 ("Position: " ++ show position)
+  refreshScreen
 
 startGame :: (MonadIO m) => Window -> Controller m (Maybe Player)
 startGame window = do 
-  liftIO $ Curses.move 10 2
   drawMatrix window
   let loop = do
       shouldStop <- processAction window
@@ -65,33 +79,39 @@ startGame window = do
 
   loop
 
-moveCursor :: (MonadIO m) => Controller m ()
-moveCursor = do
+mapCursor :: (MonadIO m) => Controller m ()
+mapCursor = do
   position <- getPosition
-  liftIO $ do
-    case position of
-      (1,1) -> Curses.move 10 2
-      (1,2) -> Curses.move 10 5
-      (1,3) -> Curses.move 10 8
-      (2,1) -> Curses.move 12 2 
-      (2,2) -> Curses.move 12 5
-      (2,3) -> Curses.move 12 8
-      (3,1) -> Curses.move 14 2
-      (3,2) -> Curses.move 14 5
-      (3,3) -> Curses.move 14 8
-    refresh
+  let (x, y) = case position of
+                    (1,1) -> (10, 2) 
+                    (1,2) -> (10, 6)
+                    (1,3) -> (10, 10)
+                    (2,1) -> (11, 2) 
+                    (2,2) -> (11, 6)
+                    (2,3) -> (11, 10)
+                    (3,1) -> (12, 2)
+                    (3,2) -> (12, 6)
+                    (3,3) -> (12, 10)
+
+  moveCursor x y
 
 processAction :: (MonadIO m) => Window -> Controller m Bool
 processAction window = do
-  input <- liftIO getCh 
+  mapCursor
+  input <- readKey
+
+  let perform movement = do 
+      move movement 
+      return False
+      
   shouldStop <- case input of
-    KeyChar 'j'    -> move Down  >> return False
-    KeyChar 'k'    -> move Up    >> return False 
-    KeyChar 'h'    -> move Left  >> return False
-    KeyChar 'l'    -> move Right >> return False
-    KeyChar '\ESC' -> return True
-    _              -> return False
-  liftIO $ mvWAddStr window 21 0 ("Last command: " ++ show input)
+    KeyChar 'j' -> perform Down 
+    KeyChar 'k' -> perform Up  
+    KeyChar 'h' -> perform Left 
+    KeyChar 'l' -> perform Right 
+    KeyChar 'q' -> return True
+    _           -> return False
+  printOn window 21 0 ("Last command: " ++ show input)
   drawMatrix window
   return shouldStop
     
