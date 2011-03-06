@@ -1,7 +1,7 @@
 module Main where
   
-  import Data.TicTacToe (evalGame)
-  import qualified View.NCurses as Application 
+  import Controller (evalController)
+  import qualified View as View
 
   main :: IO ()
-  main = evalGame Application.main
+  main = evalController View.main

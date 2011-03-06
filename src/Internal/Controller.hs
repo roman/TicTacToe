@@ -4,6 +4,7 @@
   , Movement (..)
   , evalController
   , getPosition
+  , getMatrix
   , setMatrix
   , makeMovement
   , move
@@ -64,6 +65,9 @@
   alterPosition fn = do
     gs <- get
     put $ gs { gamePosition = fn (gamePosition gs) }
+
+  getMatrix :: (MonadState GameState m) => m (Matrix (Maybe Player))
+  getMatrix = gameMatrix `liftM` get
 
   setMatrix :: (MonadState GameState m) => Matrix (Maybe Player) -> m ()
   setMatrix matrix = get >>= \gs -> put $ gs { gameMatrix = matrix }
