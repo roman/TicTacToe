@@ -1,4 +1,4 @@
-module Data.Matrix 
+module Model.Matrix 
   (
     Matrix  
   , buildMatrix

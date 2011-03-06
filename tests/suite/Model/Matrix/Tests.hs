@@ -1,4 +1,4 @@
-module Data.Matrix.Tests 
+module Model.Matrix.Tests 
   (
   tests
   ) 
@@ -8,7 +8,7 @@ module Data.Matrix.Tests
   import           Test.Framework (Test)
   import           Test.Framework.Providers.HUnit (testCase)
   import           Test.HUnit (assertEqual, assertBool)
-  import           Data.Matrix 
+  import           Model.Matrix 
   
   tests :: [Test]
   tests = [

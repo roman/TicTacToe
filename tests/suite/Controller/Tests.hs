@@ -4,12 +4,13 @@ module Controller.Tests
   )
   where
   
-import Prelude hiding (Left, Right)
 import Control.Monad (forM)
 import Test.Framework (Test)
 import Test.Framework.Providers.HUnit (testCase)
 import Test.HUnit (assertEqual, assertBool)
-import Data.Matrix 
+import Prelude hiding (Left, Right)
+
+import Model.Matrix 
 import Internal.Controller
 
 tests :: [Test]

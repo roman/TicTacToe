@@ -15,10 +15,11 @@
   import Control.Monad (liftM)
   import Control.Monad.State
   import Control.Monad.Trans
-  import Data.Matrix 
   import Data.Maybe (fromMaybe, catMaybes)
   import Data.Monoid (First(..), getFirst, mconcat)
   import Prelude hiding (Left, Right)
+
+  import Model.Matrix 
 
   type Position = (Int, Int)
 
