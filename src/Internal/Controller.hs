@@ -10,6 +10,7 @@
   , makeMovement
   , move
   , getWinner
+  , isHalted
   , play
   ) where
 
@@ -48,8 +49,9 @@
 
   data GameState 
     = GameState {
-      gamePosition :: Position
-    , gameMatrix   :: Matrix (Maybe Player)
+      gamePosition  :: Position
+    , gameMatrix    :: Matrix (Maybe Player)
+    , currentPlayer :: Player
     }
 
   newtype Controller m a 
@@ -57,8 +59,21 @@
     deriving (Monad, MonadState GameState, MonadTrans, MonadIO)
 
   evalController :: (Monad m) => Controller m a -> m a
-  evalController (Controller m) = evalStateT m (GameState (1,1) newGameMatrix)
+  evalController (Controller m) = evalStateT m (GameState (1,1) newGameMatrix X)
+  
+  getPlayer :: (MonadState GameState m) => m Player
+  getPlayer = currentPlayer `liftM` get
 
+  alterPlayer :: (MonadState GameState m) => (Player -> Player) -> m ()
+  alterPlayer fn = do
+    gs <- get
+    put $ gs { currentPlayer = fn (currentPlayer gs) }
+  
+  swapPlayer :: (MonadState GameState m) => m ()
+  swapPlayer = alterPlayer opposite
+    where
+      opposite X = O
+      opposite O = X
   
   getPosition :: (MonadState GameState m) => m Position
   getPosition = gamePosition `liftM` get
@@ -113,8 +128,24 @@
       findWinner True [x] = First $ Just x
       findWinner True (x:y:xs) = findWinner (x == y) (y:xs)
 
-  play :: (MonadState GameState m) => Player -> m ()
-  play player = do
-    position <- getPosition 
+  isHalted :: (MonadState GameState m) => m Bool
+  isHalted = getMatrix >>= return . checkHalted
+    where
+      checkHalted matrix = 
+        (== 8) .
+        length .
+        catMaybes .
+        map sequence $ 
+          getRows matrix ++
+          getCols matrix ++
+          getDiagonals matrix
+
+  play :: (MonadState GameState m) => m ()
+  play = do
+    player   <- getPlayer
+    position <- getPosition
     alterMatrix (snd . update position (Just . Just . fromMaybe player))
+    swapPlayer
+
+
               

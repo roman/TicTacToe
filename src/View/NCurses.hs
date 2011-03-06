@@ -16,6 +16,7 @@ main :: (MonadIO m) => Controller m ()
 main = do
   window <- liftIO $ do initCurses 
                         cursSet CursorVeryVisible
+                        echo False
                         initScr
   mainMenu window
   liftIO endWin
@@ -24,7 +25,7 @@ main = do
 -- utility functions to avoid the us of liftIO everywhere
 
 printOn :: (MonadIO m) => Window -> Int -> Int -> String -> Controller m ()
-printOn window x y str = liftIO $ mvWAddStr window x y str 
+printOn window x y str = liftIO $ mvWAddStr window x y str >> refresh
 
 moveCursor :: (MonadIO m) => Int -> Int -> Controller m ()
 moveCursor x y = liftIO $ Curses.move x y >> refresh
@@ -53,7 +54,13 @@ mainMenu window = do
         refreshScreen
         readKey
       case option of
-        KeyChar '1' -> liftIO (echo False) >> startGame window >> return ()
+        KeyChar '1' -> do
+          player <- startGame window 
+          case player of
+            Just p  -> printOn window 30 0 $ "Player " ++ show p ++ " won the game"
+            Nothing -> printOn window 30 0 $ "It was a tie"
+          readKey
+          return ()
         KeyChar '2' -> return ()
         _           -> readOption True
     
@@ -72,10 +79,14 @@ startGame window = do
   drawMatrix window
   let loop = do
       shouldStop <- processAction window
-      winner <- getWinner
+      winner     <- getWinner
+      halted     <- isHalted
       case winner of
         Just player -> return $ Just player
-        Nothing     -> if shouldStop then return Nothing else loop
+        Nothing     -> 
+          if shouldStop || halted
+            then return Nothing 
+            else loop
 
   loop
 
@@ -109,6 +120,7 @@ processAction window = do
     KeyChar 'k' -> perform Up  
     KeyChar 'h' -> perform Left 
     KeyChar 'l' -> perform Right 
+    KeyChar ' ' -> play >> return False
     KeyChar 'q' -> return True
     _           -> return False
   printOn window 21 0 ("Last command: " ++ show input)

@@ -19,6 +19,7 @@ tests = [
         , testMove
         , testGetWinner
         , testPlay
+        , testIsHaltedGame
         ]
 
 winingGames :: [Matrix (Maybe Player)]
@@ -87,6 +88,14 @@ normalGame =
   , [Nothing, Just X, Nothing]
   ]
 
+haltedGame :: Matrix (Maybe Player)
+haltedGame =
+  buildMatrix [
+    [Just O, Just X, Just O]
+  , [Just X, Just O, Just X]
+  , [Just X, Just O, Just X]
+  ]
+
 testMakeMovement :: Test
 testMakeMovement = testCase "controller/makeMovement" $ do
   assertEqual "makeMovement is modifying on edges" (0, 0) $ makeMovement Left (0, 0)
@@ -132,15 +141,23 @@ testGetWinner = testCase "controller/getWinner" $ do
 testPlay :: Test
 testPlay = testCase "controller/play" $ do
   result <- evalController $ do
-              play X
+              play -- X
               move Right
-              play O
+              play -- O
               move Down
-              play X
+              play -- X
               move Down
-              play O
+              play -- O
               move Right
-              play X
+              play -- X
               getWinner
   assertEqual "play is not working" (Just X) result
+
+testIsHaltedGame :: Test
+testIsHaltedGame = testCase "controller/isHalted" $ do
+  result <- evalController $ do
+              setMatrix haltedGame
+              isHalted
+  assertBool "isHalted is not working" result
+  
 
