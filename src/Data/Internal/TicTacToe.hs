@@ -3,13 +3,14 @@ module Data.Internal.TicTacToe
     TicTacToe 
   , PlayerId (..)
   , runGame 
+  , evalGame
   , setMatrix
   , play
   , getWinner
   ) where
 
   import Control.Monad (when, sequence)
-  import Control.Monad.State (MonadState, get, put, StateT, runStateT)
+  import Control.Monad.State (MonadState, get, put, StateT, runStateT, evalStateT)
   import Control.Monad.Trans (MonadIO, MonadTrans)
   import Data.Matrix (Matrix, buildMatrix, getRows, getCols, getDiagonals, update)
   import Data.Maybe (catMaybes)
@@ -37,9 +38,11 @@ module Data.Internal.TicTacToe
       , replicate 3 Nothing 
       ]
 
-
   runGame :: (Monad m) => TicTacToe m a -> m (a, GameInfo)
   runGame (TTT m) = runStateT m (GameInfo newGameMatrix)
+
+  evalGame :: (Monad m) => TicTacToe m a -> m a
+  evalGame (TTT m) = evalStateT m (GameInfo newGameMatrix)
 
   updateGameInfo :: (MonadState GameInfo m) => (GameInfo -> GameInfo) -> m ()
   updateGameInfo fn = get >>= put . fn
