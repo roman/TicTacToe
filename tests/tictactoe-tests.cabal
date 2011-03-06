@@ -58,7 +58,8 @@ Executable testsuite
   Extensions:
     OverloadedStrings,
     GeneralizedNewtypeDeriving,
-    FlexibleContexts
+    FlexibleContexts,
+    TupleSections
   
   -- Packages needed in order to build this package.
   Build-depends: 
