@@ -46,6 +46,15 @@ mainMenu window = do
   printOn window 4 0 "1. Play a game"
   printOn window 5 0 "2. Exit"
 
+  let repeatGame = do
+      restart
+      player <- startGame window 
+      case player of
+        (Just p,  _)     -> printOn window 30 0 ("Player " ++ show p ++ " won the game") >> repeatGame
+        (Nothing, False) -> printOn window 30 0 "It was a tie" >> repeatGame
+        (Nothing, True)  -> return ()
+    
+
   let readOption triedAlready = do
       option <- do
         when triedAlready $ printOn window 6 0 "(Invalid Option, try again)"
@@ -54,13 +63,7 @@ mainMenu window = do
         refreshScreen
         readKey
       case option of
-        KeyChar '1' -> do
-          player <- startGame window 
-          case player of
-            Just p  -> printOn window 30 0 $ "Player " ++ show p ++ " won the game"
-            Nothing -> printOn window 30 0 $ "It was a tie"
-          readKey
-          return ()
+        KeyChar '1' -> repeatGame
         KeyChar '2' -> return ()
         _           -> readOption True
     
@@ -74,7 +77,7 @@ drawMatrix window = do
   printOn window 16 0 ("Position: " ++ show position)
   refreshScreen
 
-startGame :: (MonadIO m) => Window -> Controller m (Maybe Player)
+startGame :: (MonadIO m) => Window -> Controller m (Maybe Player, Bool)
 startGame window = do 
   drawMatrix window
   let loop = do
@@ -82,11 +85,13 @@ startGame window = do
       winner     <- getWinner
       halted     <- isHalted
       case winner of
-        Just player -> return $ Just player
+        Just player -> return $ (Just player, True)
         Nothing     -> 
-          if shouldStop || halted
-            then return Nothing 
-            else loop
+          if shouldStop 
+            then return (Nothing, True)
+            else if halted
+                   then return (Nothing, False) 
+                   else loop
 
   loop
 

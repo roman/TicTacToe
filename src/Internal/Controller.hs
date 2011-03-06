@@ -4,6 +4,7 @@
   , Player (..) 
   , Movement (..)
   , evalController
+  , restart
   , getPosition
   , getMatrix
   , setMatrix
@@ -146,6 +147,9 @@
     position <- getPosition
     alterMatrix (snd . update position (Just . Just . fromMaybe player))
     swapPlayer
+
+  restart :: (MonadState GameState m) => m ()
+  restart = setMatrix newGameMatrix >> alterPosition (const (1,1))
 
 
               

@@ -2,6 +2,7 @@ module Controller
   (
     Controller
   , evalController
+  , restart
   , Player (..)
   , Movement (..)
   , move
