@@ -7,6 +7,7 @@ module Controller
   , move
   , play
   , getWinner
+  , getPosition
   , getMatrix
   )
   where
