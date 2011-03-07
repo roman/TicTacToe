@@ -2,8 +2,7 @@ Vancouver Haskell unMeetup.
 
 This project is intended to teach developers how to do a "real-world" Haskell project, by using Cabal and common Haskell libraries.
 
-You may get started by implementing the whole project or just part of it, the tests that check behaviour are already there, so you can develop based if
-the test run on or not. 
+You may get started by implementing the whole project or just part of it, the tests that check the behaviour of the implementation are already there, so you can develop based checking if the test run successfuly on or not. 
 
 1) 
   * [Advanced] To implement the whole project, you will need to checkout the branch *do_all_project*
@@ -52,6 +51,6 @@ In order to compile and run the project to check how it is working:
     $ cabal build
     $ ./dist/build/TicTacToe/TicTacToe
 
-Follow the instructions in the comments above each function, in the source file.
+Follow the instructions in the comments above each function in the source files to get a better understanding of what you need to do.
 
 Good luck.
