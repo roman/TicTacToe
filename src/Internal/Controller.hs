@@ -67,20 +67,20 @@
   
   -- Implement a function that gets the current State out of the Controller
   -- Monad and returns just the currentPlayer of the GameState
-  getPlayer :: (MonadState GameState m) => m Player
+  getPlayer :: (Monad m) => Controller m Player
   getPlayer = currentPlayer `liftM` get
 
   -- Implement a function that recieves an altering function, then invoked
   -- with the currentPlayer as an argument, and the result Player is stored
   -- in the GameState
-  alterPlayer :: (MonadState GameState m) => (Player -> Player) -> m ()
+  alterPlayer :: (Monad m) => (Player -> Player) -> Controller m ()
   alterPlayer fn = do
     gs <- get
     put $ gs { currentPlayer = fn (currentPlayer gs) }
   
   -- Using alterPlayer, implement a function that changes the current player
   -- from X to O
-  swapPlayer :: (MonadState GameState m) => m ()
+  swapPlayer :: (Monad m) => Controller m ()
   swapPlayer = alterPlayer opposite
     where
       opposite X = O
@@ -88,29 +88,29 @@
   
   -- Implement a function that gets the current State out of the Controller
   -- Monad and returns just the currentPosition of the GameState
-  getPosition :: (MonadState GameState m) => m Position
+  getPosition :: (Monad m) => Controller m Position
   getPosition = gamePosition `liftM` get
 
   -- Implement a function that recieves an altering function, then invoked
   -- with the currentPosition as an argument, and the result Position is stored
   -- in the GameState
-  alterPosition :: (MonadState GameState m) => (Position -> Position) -> m ()
+  alterPosition :: (Monad m) => (Position -> Position) -> Controller m ()
   alterPosition fn = do
     gs <- get
     put $ gs { gamePosition = fn (gamePosition gs) }
 
   -- Implement a function that returns the current matrix from the GameState
-  getMatrix :: (MonadState GameState m) => m (Matrix (Maybe Player))
+  getMatrix :: (Monad m) => Controller m (Matrix (Maybe Player))
   getMatrix = gameMatrix `liftM` get
 
   -- Implement a function that sets the current matrix in the GameState
-  setMatrix :: (MonadState GameState m) => Matrix (Maybe Player) -> m ()
+  setMatrix :: (Monad m) => Matrix (Maybe Player) -> Controller m ()
   setMatrix matrix = get >>= \gs -> put $ gs { gameMatrix = matrix }
 
   -- Implement a function that recieves an altering function, then invoked
   -- with the current matrix as an argument, and the result store in the
   -- GameState
-  alterMatrix :: (MonadState GameState m) => (Matrix (Maybe Player) -> Matrix (Maybe Player)) -> m ()
+  alterMatrix :: (Monad m) => (Matrix (Maybe Player) -> Matrix (Maybe Player)) -> Controller m ()
   alterMatrix fn = do
     gs <- get
     put $ gs { gameMatrix = fn (gameMatrix gs) }
@@ -139,13 +139,13 @@
   -- Implement a function that will modify the currentPosition in the
   -- state by applying a movement to it
   -- Hint: use the alterPosition and makeMovement function to implement this
-  move :: (MonadState GameState m) => Movement -> m ()
+  move :: (Monad m) => Movement -> Controller m ()
   move movement = alterPosition (makeMovement movement)
 
   -- [HARD] Implement a function that process the current game matrix on the 
   -- game state and infers if the game has a winner.
   -- Hint: use the getMatrix function
-  getWinner :: (MonadState GameState m) => m (Maybe Player)
+  getWinner :: (Monad m) => Controller m (Maybe Player)
   getWinner = get >>= return . checkMatrix . gameMatrix
     where
       checkMatrix :: Matrix (Maybe Player) -> Maybe Player
@@ -166,7 +166,7 @@
 
   -- Implement a function that process the current game matrix and infers
   -- if the game is on a tie.
-  isHalted :: (MonadState GameState m) => m Bool
+  isHalted :: (Monad m) => Controller m Bool
   isHalted = getMatrix >>= return . checkHalted
     where
       checkHalted matrix = 
@@ -180,7 +180,7 @@
 
   -- Implement a function that will assign a player to the game matrix 
   -- in the current position of the GameState
-  play :: (MonadState GameState m) => m ()
+  play :: (Monad m) => Controller m ()
   play = do
     player   <- getPlayer
     position <- getPosition
@@ -189,8 +189,7 @@
 
   -- Implement a function that will restart the matrix, and set the position
   -- to (1,1)
-  restart :: (MonadState GameState m) => m ()
+  restart :: (Monad m) => Controller m ()
   restart = setMatrix newGameMatrix >> alterPosition (const (1,1))
-
 
               
