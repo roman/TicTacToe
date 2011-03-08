@@ -17,15 +17,13 @@ module Model.Matrix
   -- Implement a function that given a list, if empty returns nothing
   -- if not, just return the head of the list wrapped in a Maybe
   safeHead :: [a] -> Maybe a
-  safeHead []     = Nothing
-  safeHead xs = Just $ head xs
+  safeHead = undefined
 
   -- Optional:
   -- Implement a function that given a list, if empty returns nothing
   -- if not, just return the tail of the list wrapped in a Maybe
   safeTail :: [a] -> Maybe [a]
-  safeTail [] = Nothing
-  safeTail xs = Just $ tail xs
+  safeTail = undefined
 
   -- Definition of the Matrix type
   -- for more info about newtype vs data:
@@ -40,27 +38,25 @@ module Model.Matrix
 
   -- Given a Matrix, get the Rows out of it as a list of rows
   getRows :: Matrix a -> [[a]]
-  getRows (Matrix rs) = rs
+  getRows m = undefined
 
   -- Given a Matrix, get the Columns out of it as a list of columns
   getCols :: Matrix a -> [[a]]
-  getCols = transpose . getRows
+  getCols m = undefined
 
   -- Given a Matrix, get the Diagonals as a list of of diagonals
   getDiagonals :: Matrix a -> [[a]]
-  getDiagonals m = (helper 0 $ getRows m) : (helper 0 . reverse $ getRows m) : []
-    where
-      helper _ [] = []
-      helper n (x:xs) = head (drop n x) : helper (n + 1) xs
+  getDiagonals m = undefined
 
   -- Given a pair (Row, Col) and a Matrix return the element that is on that
   -- position wrapped in a Maybe.
   -- If the (Row,Col) combination is invalid, return Nothing
-  -- Hint: you might want to use the safeHead function here
+  -- Hint:
+  --  * you might want to use the safeHead function here
+  --  * use the Maybe Monad
+  --       
   lookup :: (Int, Int) -> Matrix a -> Maybe a
-  lookup (x,y) m = do 
-    row <- safeHead . drop (x - 1) . getRows $ m
-    safeHead $ drop (y - 1) row
+  lookup = undefined
 
   -- Given a pair (Row, Col), a Matrix, and a function that modifies an
   -- element, return the Matrix with the element modified by the given function
@@ -101,16 +97,4 @@ module Model.Matrix
   --                    else x
   --
   update :: (Int, Int) -> (a -> Maybe a) -> Matrix a -> (Bool, Matrix a)
-  update (x,y) fn matrix = 
-      fromMaybe (False, matrix) $ do
-        let (preR, postR) = splitAt (x - 1) (getRows matrix) 
-        row <- safeHead postR 
-        let (preC, postC) = splitAt (y - 1) row 
-        value  <- safeHead postC
-        value' <- fn value
-        postR' <- safeTail postR
-        postC' <- safeTail postC
-        return (True, buildMatrix $ preR ++ 
-                                    [preC ++ [value'] ++ postC'] ++ 
-                                    postR')
-
+  update = undefined
